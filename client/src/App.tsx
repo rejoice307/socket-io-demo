@@ -1,33 +1,30 @@
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react"
-import { io } from "socket.io-client"
+import { FormEvent, useRef, useState } from "react"
+import { useWebSocketContext } from "./states/useWebSocketContext"
 
-const socket = io('http://localhost:9000')
+// const socket = io('http://localhost:9000')
 
 function App() {
 
-  const [socketId, setSocketId] = useState('')
+  const { isConnected, socket } = useWebSocketContext()
+
   const [messages, setMessages] = useState<string[] | undefined>([])
   const [joinedRoom, setJoinedRoom] = useState('')
 
   const messageInputRef = useRef<HTMLInputElement>(null)
   const roomInputRef = useRef<HTMLInputElement>(null)
 
-  socket.on('connect', () => {
-    if (!!socket.id) setSocketId(socket.id)
-  })
-
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
-    if (!!messageInputRef.current?.value && socket.connected) {
-      socket.emit('send-msg', { message: messageInputRef.current.value, room: joinedRoom })
+    if (!!messageInputRef.current?.value && isConnected) {
+      socket?.emit('send-msg', { message: messageInputRef.current.value, room: joinedRoom })
       updateMessages(messageInputRef.current.value)
       messageInputRef.current.value = ''
     }
   }
 
   const joinRoom = () => {
-    if (!!roomInputRef.current?.value && socket.connected) {
-      socket.emit('join-room', roomInputRef.current.value)
+    if (!!roomInputRef.current?.value && isConnected) {
+      socket?.emit('join-room', roomInputRef.current.value)
       setJoinedRoom(roomInputRef.current.value)
       roomInputRef.current.value = ''
     }
@@ -41,17 +38,18 @@ function App() {
     }
   }
 
-  socket.on('msg-received', (msg) => {
+  socket?.on('msg-received', (msg) => {
     updateMessages(msg)
   })
 
   return (
     <main className='container mx-auto max-w-screen-lg'>
       <div className="border-2 border-black mt-4">
-        {!!socketId && <p className="mx-4 font-bold">Socket ID: {socketId}
+        <span className={`${isConnected ? 'bg-green-600' : 'bg-red-600'} h-2 w-2 block rounded my-2 mr-2 float-right`}>{ }</span>
+        {isConnected && <p className="mx-4 font-bold">Socket ID: {socket?.id}
           {!!joinRoom && <span className="ml-4">{joinedRoom}</span>}
         </p>}
-        <div className="mx-2 border border-black py-2 px-2 my-4">
+        <div className="mx-2 border border-black py-2 px-2 mt-6 mb-4">
 
           {!!messages?.length && messages.map((msg, idx) => (
             <p key={msg + idx} className="border-2 my-2 px-2 border-teal-900">{msg}</p>

@@ -20,12 +20,10 @@ io.on('connection', (socket) => {
   console.info('new user has connected with id: ', socket.id)
 
   socket.on('join-room', (roomId) => {
-    console.info('joined', roomId)
     socket.join(roomId)
   })
 
   socket.on('send-msg', (data) => {
-    console.log('dataaa,',data)
     socket.to(data.room).emit('msg-received', data.message)
   })
 })
