@@ -24,10 +24,8 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
   const [socketConnection, setSocketConnection] = useState<Socket | undefined>()
 
   socket.on('connect', () => {
-    console.info('connected', socket)
     setSocketConnection(socket)
     socket.on('disconnect', () => {
-      console.info('disconnected', socket)
       setSocketConnection(undefined)
     });
   })
