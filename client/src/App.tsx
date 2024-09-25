@@ -7,6 +7,7 @@ function App() {
 
   const [socketId, setSocketId] = useState('')
   const [messages, setMessages] = useState<string[] | undefined>([])
+  const [joinedRoom, setJoinedRoom] = useState('')
 
   const messageInputRef = useRef<HTMLInputElement>(null)
   const roomInputRef = useRef<HTMLInputElement>(null)
@@ -18,11 +19,16 @@ function App() {
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault()
     if (!!messageInputRef.current?.value && socket.connected) {
-      socket.emit('send-msg', messageInputRef.current.value)
+      socket.emit('send-msg', { message: messageInputRef.current.value, room: joinedRoom })
       updateMessages(messageInputRef.current.value)
       messageInputRef.current.value = ''
-    } else if (!!roomInputRef.current?.value) {
+    }
+  }
+
+  const joinRoom = () => {
+    if (!!roomInputRef.current?.value && socket.connected) {
       socket.emit('join-room', roomInputRef.current.value)
+      setJoinedRoom(roomInputRef.current.value)
       roomInputRef.current.value = ''
     }
   }
@@ -42,7 +48,9 @@ function App() {
   return (
     <main className='container mx-auto max-w-screen-lg'>
       <div className="border-2 border-black mt-4">
-        {!!socketId && <p className="mx-4 font-bold">Socket ID: {socketId}</p>}
+        {!!socketId && <p className="mx-4 font-bold">Socket ID: {socketId}
+          {!!joinRoom && <span className="ml-4">{joinedRoom}</span>}
+        </p>}
         <div className="mx-2 border border-black py-2 px-2 my-4">
 
           {!!messages?.length && messages.map((msg, idx) => (
@@ -61,7 +69,7 @@ function App() {
         <p className="flex justify-between w-full items-center">
           <span>Room:</span>
           <input ref={roomInputRef} type="text" name="room" className="border-2 border-teal-800 rounded w-full mx-4 py-2" />
-          <button type="submit" className="border-2 border-teal-800 px-4 py-2 rounded bg-slate-100">Join</button>
+          <button onClick={joinRoom} type="button" className="border-2 border-teal-800 px-4 py-2 rounded bg-slate-100">Join</button>
         </p>
       </form>
 
