@@ -18,7 +18,6 @@ export const useWebSocketContext = () => {
 
 const socket = io('http://localhost:9000')
 
-
 export const WebSocketContextProvider = ({ children }: { children: ReactNode }) => {
 
   const [socketConnection, setSocketConnection] = useState<Socket | undefined>()
