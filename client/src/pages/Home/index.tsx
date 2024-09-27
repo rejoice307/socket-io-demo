@@ -44,7 +44,6 @@ const HomePage = () => {
   return (
     <main className='container mx-auto max-w-screen-lg'>
       <div className="border-2 border-black mt-4">
-        <span className={`${isConnected ? 'bg-green-600' : 'bg-red-600'} h-2 w-2 block rounded my-2 mr-2 float-right`}>{ }</span>
         {isConnected && <p className="mx-4 font-bold">Socket ID: {socket?.id}
           {!!joinRoom && <span className="ml-4">{joinedRoom}</span>}
         </p>}
