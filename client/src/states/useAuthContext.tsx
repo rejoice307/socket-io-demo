@@ -1,13 +1,13 @@
 // useAuthContext
-import { deleteCookie, getCookie, hasCookie, setCookie } from 'cookies-next'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { ChildrenType, UserType } from '../types'
+import { useWebSocketContext } from './useWebSocketContext'
 
 export type AuthContextType = {
   user: UserType | undefined
-  isAuthenticated: boolean
-  saveSession: (session: UserType) => void
+  users: UserType[] | undefined
+  saveSession: (session: Omit<UserType, 'id'>) => void
   removeSession: () => void
 }
 
@@ -22,35 +22,42 @@ export function useAuthContext () {
   return context
 }
 
-const authSessionKey = '_SOCKET_AUTH_KEY_'
-
 export function AuthProvider ({ children }: ChildrenType) {
+
   const navigate = useNavigate()
 
-  const getSession = (): AuthContextType['user'] => {
-    const fetchedCookie = getCookie(authSessionKey)?.toString()
-    if (!fetchedCookie) return
-    else return JSON.parse(fetchedCookie)
-  }
+  const { socket } = useWebSocketContext()
 
-  const [user, setUser] = useState<UserType | undefined>(getSession())
+  const [user, setUser] = useState<UserType | undefined>({ id: '', room: '', username: '' })
 
-  const saveSession: AuthContextType['saveSession'] = (user) => {
-    setCookie(authSessionKey, JSON.stringify(user))
+  const [users, setUsers] = useState<UserType[] | []>([])
+
+  const saveSession: AuthContextType['saveSession'] = useCallback(({ username, room }) => {
+    console.log('usernamee', username, room, socket)
+    socket?.emit('login', { username, room }, (error: string) => {
+      if (error) alert(error)
+      navigate('/chat')
+    })
+
     setUser(user)
-  }
+  }, [socket])
 
-  const removeSession = () => {
-    deleteCookie(authSessionKey)
+  const removeSession = useCallback(() => {
     setUser(undefined)
-    navigate('/auth/sign-in')
-  }
+    navigate('/')
+  }, [])
+
+  useEffect(() => {
+    socket?.on('users', (users) => {
+      setUsers(users)
+    })
+  }, [socket])
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: hasCookie(authSessionKey),
+        users,
         saveSession,
         removeSession,
       }}>

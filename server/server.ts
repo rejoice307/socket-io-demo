@@ -20,8 +20,8 @@ app.use(cors(corOptions))
 io.on('connection', (socket) => {
   console.info('new user has connected with id: ', socket.id)
 
-  socket.on('login', ({ name, room }, callback) => {
-    const { user, error } = addUser(socket.id, name, room)
+  socket.on('login', ({ username, room }, callback) => {
+    const { user, error } = addUser(socket.id, username, room)
     if (error) return callback(error)
     if (user) {
       socket.join(user.room)

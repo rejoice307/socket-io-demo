@@ -5,29 +5,28 @@ import Layout from './components/Layout'
 import { WebSocketContextProvider } from "./states/useWebSocketContext"
 import { AuthProvider } from './states/useAuthContext'
 
-const HomePage = lazy(() => import("./pages/Home"))
-
+const ChatPage = lazy(() => import("./pages/Chat/index2"))
+const LoginPage = lazy(() => import("./pages/Login"))
+const NotFoundPage = lazy(() => import('./pages/NotFound'))
 
 const App = () => {
 
   return (
-    <WebSocketContextProvider>
-      <AuthProvider>
+    <BrowserRouter>
+      <WebSocketContextProvider>
+        <AuthProvider>
 
-        <BrowserRouter>
           <Routes>
 
-            <Route path="/" element={
-              <Layout>
-                <HomePage />
-              </Layout>
-            } />
+            <Route path="/" element={<Layout><LoginPage /></Layout>} />
+            <Route path="/chat" element={<Layout><ChatPage /></Layout>} />
+            <Route path="*" element={<NotFoundPage />} />
 
           </Routes>
-        </BrowserRouter>
 
-      </AuthProvider>
-    </WebSocketContextProvider>
+        </AuthProvider>
+      </WebSocketContextProvider>
+    </BrowserRouter>
   )
 }
 

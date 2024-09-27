@@ -1,11 +1,9 @@
-import { createContext, ReactNode, useContext, useState } from 'react'
+import { createContext, ReactNode, useCallback, useContext, useState } from 'react'
 import { io, Socket } from "socket.io-client"
-import FullScreenSpinner from '../components/FullScreenSpinner'
 
 type WebSocketContextType = {
   isConnected: boolean
   socket: Socket | undefined
-  unreadMessagesCount: number
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(undefined)
@@ -19,12 +17,11 @@ export const useWebSocketContext = () => {
   return context
 }
 
-const socket = io('http://localhost:9000')
+const socket = io('http://localhost:9000', { transports: ['websocket', 'polling'] })
 
 export const WebSocketContextProvider = ({ children }: { children: ReactNode }) => {
 
   const [socketConnection, setSocketConnection] = useState<Socket | undefined>()
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0)
 
   socket.on('connect', () => {
     setSocketConnection(socket)
@@ -37,9 +34,8 @@ export const WebSocketContextProvider = ({ children }: { children: ReactNode }) 
     <WebSocketContext.Provider value={{
       isConnected: socketConnection?.active ?? false,
       socket: socketConnection,
-      unreadMessagesCount,
     }}>
-      {socketConnection?.active ? children : <FullScreenSpinner />}
+      {children}
     </WebSocketContext.Provider>
   )
 }
