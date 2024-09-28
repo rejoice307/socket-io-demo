@@ -34,9 +34,11 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', (message) => {
     const user = getUser(socket.id)
     if (user) {
-      io.in(user.room).emit('message', { user: user.username, text: message })
+      io.in(user.room).emit('message', { username: user.username, message })
     }
   })
+
+
 
   socket.on('disconnect', () => {
     console.info('User Disconnected', socket.id)
@@ -46,8 +48,6 @@ io.on('connection', (socket) => {
       io.in(user.room).emit('users', getUsersByRoom(user.room))
     }
   })
-
-
 
   socket.on('join-room', (roomId) => {
     socket.join(roomId)

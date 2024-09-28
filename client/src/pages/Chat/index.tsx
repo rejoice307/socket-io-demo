@@ -5,18 +5,23 @@ import { BiMessageDetail } from 'react-icons/bi'
 import { FiList } from 'react-icons/fi'
 import MessageInputForm from './components/MessageInputForm'
 
+type MessageType = {
+  username: string
+  message: string
+}
+
 const ChatApp = () => {
 
   const { socket } = useWebSocketContext()
   const { user, users, removeSession } = useAuthContext()
 
-  const [messages, setMessages] = useState<string[]>([])
+  const [messages, setMessages] = useState<MessageType[]>([])
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
 
-    socket?.on('message', (msg: string) => {
+    socket?.on('message', (msg: MessageType) => {
       setMessages(messages => [...messages, msg])
     })
 
@@ -46,7 +51,7 @@ const ChatApp = () => {
             <div className="absolute mt-2 bg-white rounded shadow-lg w-48 z-10">
               {users && users.map((user) => (
                 <div key={user.id} className="p-2 border-b last:border-b-0">
-                  <p className="text-sm">{user.name}</p>
+                  <p className="text-sm">{user.username}</p>
                 </div>
               ))}
             </div>
@@ -54,10 +59,10 @@ const ChatApp = () => {
 
           <div className="flex flex-col items-center">
             <h4 className="text-lg font-bold">
-              {room.charAt(0).toUpperCase() + room.slice(1)}
+              {user?.room.charAt(0).toUpperCase() + user?.room.slice(1)}
             </h4>
             <div className="flex items-center">
-              <span className="mr-1 text-gray-700 text-sm">{name}</span>
+              <span className="mr-1 text-gray-700 text-sm">{user?.username}</span>
               <span className="h-2 w-2 bg-green-400 rounded-full"></span>
             </div>
           </div>
@@ -69,11 +74,11 @@ const ChatApp = () => {
       </div>
 
       <div className="flex-grow overflow-y-auto bg-gray-100 p-4">
-        {messages.length > 0 ? (
+        {!!messages.length ? (
           messages.map((msg, i) => (
-            <div key={i} className={`message mb-2 ${msg.user === name ? "self-end" : "self-start"}`}>
-              <p className="text-xs text-gray-600 ml-2">{msg.user}</p>
-              <p className="msg p-2 bg-blue-500 text-white rounded-xl">{msg.text}</p>
+            <div key={i} className={`message mb-2 ${msg.username === user?.username ? "self-end" : "self-start"}`}>
+              <p className="text-xs text-gray-600 ml-2">{msg?.username}</p>
+              <p className="msg p-2 bg-blue-500 text-white rounded-xl">{msg?.message} {JSON.stringify(msg)}</p>
             </div>
           ))
         ) : (

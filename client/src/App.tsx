@@ -5,7 +5,7 @@ import Layout from './components/Layout'
 import { WebSocketContextProvider } from "./states/useWebSocketContext"
 import { AuthProvider } from './states/useAuthContext'
 
-const ChatPage = lazy(() => import("./pages/Chat/index2"))
+const ChatPage = lazy(() => import("./pages/Chat"))
 const LoginPage = lazy(() => import("./pages/Login"))
 const NotFoundPage = lazy(() => import('./pages/NotFound'))
 
